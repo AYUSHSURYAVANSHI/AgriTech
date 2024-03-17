@@ -1,0 +1,9 @@
+[build]
+  command = "python app.py"
+  publish = "templates"
+
+[context.production.environment]
+  FLASK_DEBUG = "production"
+
+[context.deploy-preview.environment]
+  FLASK_DEBUG = "development"

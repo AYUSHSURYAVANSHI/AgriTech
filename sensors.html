@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Real time value of soil moisture and temperature</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <div id="gas-chart-box">
+      <canvas id="gas-chart"></canvas>
+    </div>
+    <div id="distance-chart-box">
+      <canvas id="distance-chart"></canvas>
+    </div>
+    
+    <script>
+        const sensorChartCanvas = document.getElementById('sensor-chart');
+        const sensorChartCtx = sensorChartCanvas.getContext('2d');
+        let sensorChart;
+        let sensorData = {
+          labels: [],
+          datasets: [
+            {
+              label: 'Moisture',
+              data: [],
+              borderColor: 'rgb(75, 192, 192)',
+              borderWidth: 1,
+              fill: false
+            },
+            {
+              label: 'Temperature',
+              data: [],
+              borderColor: 'rgb(255, 99, 132)',
+              borderWidth: 1,
+              fill: false
+            }
+          ]
+        };
+      
+        function updateSensorChart() {
+          fetch('/get-old-data')  // Change the URL to match your Django route
+            .then(response => response.json())
+            .then(data => {
+              const timestamp = new Date().toLocaleTimeString();
+              const moisture = data.data[0].moisture;
+              const temperature = data.data[0].temperature;
+              sensorData.labels.push(timestamp);
+              sensorData.datasets[0].data.push(moisture);
+              sensorData.datasets[1].data.push(temperature);
+              sensorChart.update();
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+        
+        function createSensorChart() {
+          sensorChart = new Chart(sensorChartCtx, {
+            type: 'line',
+            data: sensorData,
+            options: {
+              responsive: true,
+              scales: {
+                xAxes: [{
+                  type: 'time',
+                  time: {
+                    unit: 'second'
+                  }
+                }],
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: true
+                  }
+                }]
+              }
+            }
+          });
+        }
+        
+        createSensorChart();
+        setInterval(updateSensorChart, 2000);
+      </script>
+      </body>
+      </html>
+      
